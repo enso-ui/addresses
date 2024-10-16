@@ -3,9 +3,10 @@
         :path="path"
         :params="params"
         :key="key"
-        @ready="setFields"
+        @loaded="setFields"
         v-bind="$attrs"
-        disable-state>
+        disable-state
+        ref="form">
         <template #actions-left
             v-if="canLocalize">
             <a class="button is-warning"
@@ -61,17 +62,30 @@
                     errors.clear(regionId.name);
                 "/>
         </template>
-        <template #locality_id="{ field: localityId, errors }">
+        <template #locality_id="{ field: localityId, errors }"
+            v-if="form">
             <form-field :field="localityId"
                 :params="localityParams"
+                @selection="form.field('sector_id').meta.hidden = !$event || !$event.hasSectors;"
                 @update:model-value="
+                    sectorParams.locality_id = $event;
+                    form.field('sector_id').value = null
                     errors.clear(localityId.name)
                 "/>
+        </template>
+        <template #sector_id="{ field: sectorId, errors }">
+            <form-field :field="sectorId"
+                :params="sectorParams"
+                @update:model-value="errors.clear(sectorId.name)"/>
         </template>
     </enso-form>
 </template>
 
-<script>
+<script setup>
+import {
+
+    defineProps, defineEmits, inject, ref, reactive, computed, nextTick, defineOptions,
+} from 'vue';
 import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faLocationArrow, faMapPin, faSearchLocation } from '@fortawesome/free-solid-svg-icons';
@@ -80,124 +94,110 @@ import { EnsoForm, FormField } from '@enso-ui/forms/bulma';
 
 library.add(faLocationArrow, faMapPin, faSearchLocation);
 
-export default {
-    name: 'AddressForm',
+defineOptions({ inheritAttrs: false });
 
-    components: {
-        Fa, EnsoForm, FormField,
+const canAccess = inject('canAccess');
+const errorHandler = inject('errorHandler');
+const http = inject('http');
+const i18n = inject('i18n');
+const route = inject('route');
+
+const props = defineProps({
+    addressableId: {
+        type: [String, Number],
+        required: true,
     },
-
-    inject: ['canAccess', 'errorHandler', 'http', 'i18n', 'route'],
-
-    inheritAttrs: false,
-
-    props: {
-        addressableId: {
-            type: [String, Number],
-            required: true,
-        },
-        id: {
-            type: [Number, null],
-            default: null,
-        },
-        type: {
-            type: String,
-            default: null,
-        },
+    id: {
+        type: [Number, null],
+        default: null,
     },
-
-    emits: ['form-loaded'],
-
-    data: () => ({
-        key: 1,
-        form: null,
-        loading: false,
-        postcode: null,
-        params: {
-            countryId: null,
-        },
-        localityParams: {
-            region_id: null,
-        },
-    }),
-
-    computed: {
-        canLocalize() {
-            return this.form && this.form.routeParam('address')
-                && this.canAccess('core.addresses.localize');
-        },
-        field() {
-            return this.form && this.form.field;
-        },
-        path() {
-            return this.id
-                ? this.route('core.addresses.edit', this.id)
-                : this.route('core.addresses.create', this.params);
-        },
-        postcodeCss() {
-            if (this.postcode === null) {
-                return 'is-info';
-            }
-
-            return this.postcode
-                ? 'is-success'
-                : 'is-danger';
-        },
+    type: {
+        type: String,
+        default: null,
     },
+});
 
-    methods: {
-        localize() {
-            this.loading = true;
-            const address = this.form.routeParam('address');
+const emit = defineEmits(['form-loaded']);
 
-            this.http.get(this.route('core.addresses.localize', address))
-                .then(({ data }) => {
-                    const { lat, long } = data;
-                    this.field('lat').value = lat;
-                    this.field('long').value = long;
-                }).catch(this.errorHandler)
-                .finally(() => (this.loading = false));
-        },
-        reRender(countryId) {
-            this.params.countryId = countryId;
-            this.key++;
-        },
-        setFields({ form }) {
-            this.form = form;
-            this.field('addressable_id').value = this.addressableId;
-            this.field('addressable_type').value = this.type;
-            this.localityParams.region_id = this.field('region_id').value;
-            this.$emit('form-loaded', form);
-        },
-        loadAddress() {
-            this.loading = true;
-            this.postcode = null;
+const key = ref(1);
+const form = ref(null);
+const loading = ref(false);
+const postcode = ref(null);
 
-            const params = {
-                params: {
-                    postcode: this.field('postcode').value,
-                    country_id: this.field('country_id').value,
-                },
-            };
+const params = reactive({ countryId: null });
+const localityParams = reactive({ region_id: null });
+const sectorParams = reactive({ locality_id: null });
 
-            this.http.get(this.route('core.addresses.postcode'), params)
-                .then(({ data: { postcode } }) => {
-                    ['lat', 'long', 'city', 'region_id', 'locality_id', 'street']
-                        .forEach(key => (this.field(key).value = postcode[key]
-                        || this.field(key).value));
-                    this.postcode = true;
-                }).catch(error => {
-                    const { status, data } = error.response;
-                    this.postcode = false;
+const canLocalize = computed(() => form.value && form.value.routeParam('address')
+        && canAccess('core.addresses.localize'));
 
-                    if (status === 422) {
-                        this.form.errors.set(data.errors);
-                        this.$nextTick(this.form.focusError);
-                    } else {
-                        this.errorHandler(error);
-                    }
-                }).finally(() => (this.loading = false));
-        },
-    },
+const path = computed(() => (props.id
+    ? route('core.addresses.edit', props.id)
+    : route('core.addresses.create', params)));
+const postcodeCss = computed(() => {
+    if (postcode.value === null) {
+        return 'is-info';
+    }
+
+    return postcode.value
+        ? 'is-success'
+        : 'is-danger';
+});
+
+const localize = () => {
+    loading.value = true;
+    const address = form.value.routeParam('address');
+
+    http.get(route('core.addresses.localize', address))
+        .then(({ data }) => {
+            const { lat, long } = data;
+            form.value.field('lat').value = lat;
+            form.value.field('long').value = long;
+        }).catch(errorHandler)
+        .finally(() => (loading.value = false));
 };
+
+const reRender = countryId => {
+    params.countryId = countryId;
+    key.value++;
+};
+
+const setFields = () => {
+    form.value.field('addressable_id').value = props.addressableId;
+    form.value.field('addressable_type').value = props.type;
+    localityParams.region_id = form.value.field('region_id').value;
+    sectorParams.locality_id = form.value.field('locality_id').value;
+    emit('form-loaded', form);
+};
+
+const loadAddress = () => {
+    loading.value = true;
+    postcode.value = null;
+
+    const params = {
+        params: {
+            postcode: form.value.field('postcode').value,
+            country_id: form.value.field('country_id').value,
+        },
+    };
+
+    http.get(route('core.addresses.postcode'), params)
+        .then(({ data: { postcode } }) => {
+            ['lat', 'long', 'city', 'region_id', 'locality_id', 'street']
+                .forEach(key => (form.value.field(key).value = postcode[key]
+                || form.value.field(key).value));
+            postcode.value = true;
+        }).catch(error => {
+            const { status, data } = error.response;
+            postcode.value = false;
+
+            if (status === 422) {
+                form.value.errors.set(data.errors);
+                nextTick(() => form.value.focusError);
+            } else {
+                errorHandler(error);
+            }
+        }).finally(() => (loading.value = false));
+};
+
 </script>
