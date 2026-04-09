@@ -1,7 +1,7 @@
 <template>
     <card collapsible
         :collapsed="collapsed">
-        <card-header class="has-background-light">
+        <card-header>
             <template #title>
                 <span class="icon is-small mr-1">
                     <fa :icon="icon"/>
@@ -14,7 +14,7 @@
                 <card-collapse/>
             </template>
         </card-header>
-        <card-content class="is-paddingless">
+        <card-content class="p-0">
             <addresses :id="id"
                 :type="type"
                 :query="query"
@@ -25,16 +25,13 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { faSignsPost } from '@fortawesome/free-solid-svg-icons';
 import {
     Card, CardHeader, CardRefresh, CardCollapse, CardBadge, CardContent,
 } from '@enso-ui/card/bulma';
 import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faMapSigns, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { useStore } from '../utils/pinia';
 import Addresses from './Addresses.vue';
-
-library.add(faMapSigns, faPlusSquare);
 
 export default {
     name: 'AddressesCard',
@@ -55,7 +52,7 @@ export default {
     props: {
         icon: {
             type: [String, Array, Object],
-            default: () => faMapSigns,
+            default: () => faSignsPost,
         },
         id: {
             type: [String, Number],
@@ -81,7 +78,9 @@ export default {
     }),
 
     computed: {
-        ...mapState('layout', ['isMobile']),
+        isMobile() {
+            return useStore('layout').isMobile;
+        },
         displayTitle() {
             return !this.isMobile
                 ? this.title || this.i18n('Addresses')

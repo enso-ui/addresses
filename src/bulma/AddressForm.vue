@@ -1,5 +1,5 @@
 <template>
-    <enso-form class="box has-background-light"
+    <enso-form class="box"
         :path="path"
         :params="params"
         :key="key"
@@ -16,7 +16,7 @@
                     {{ i18n('Localize') }}
                 </span>
                 <span class="icon">
-                    <fa icon="map-pin"/>
+                    <fa :icon="icons.localize"/>
                 </span>
                 <span class="is-hidden-mobile"/>
             </a>
@@ -43,9 +43,9 @@
                         v-if="canAccess('core.addresses.postcode')">
                         <a :class="['button', postcodeCss]"
                             @click="loadAddress">
-                        <span class="icon">
-                            <fa icon="search-location"/>
-                        </span>
+                            <span class="icon">
+                                <fa :icon="icons.search"/>
+                            </span>
                         </a>
                     </div>
                 </div>
@@ -83,16 +83,12 @@
 
 <script setup>
 import {
-
-    defineProps, defineEmits, inject, ref, reactive, computed, nextTick, defineOptions,
+    computed, defineEmits, defineOptions, defineProps, inject, nextTick, reactive, ref,
 } from 'vue';
 import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faLocationArrow, faMapPin, faSearchLocation } from '@fortawesome/free-solid-svg-icons';
+import { faMagnifyingGlassLocation, faMapPin } from '@fortawesome/free-solid-svg-icons';
 
 import { EnsoForm, FormField } from '@enso-ui/forms/bulma';
-
-library.add(faLocationArrow, faMapPin, faSearchLocation);
 
 defineOptions({ inheritAttrs: false });
 
@@ -127,6 +123,10 @@ const postcode = ref(null);
 const params = reactive({ countryId: null });
 const localityParams = reactive({ region_id: null });
 const sectorParams = reactive({ locality_id: null });
+const icons = {
+    localize: faMapPin,
+    search: faMagnifyingGlassLocation,
+};
 
 const canLocalize = computed(() => form.value && form.value.routeParam('address')
         && canAccess('core.addresses.localize'));

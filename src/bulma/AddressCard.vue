@@ -1,5 +1,5 @@
 <template>
-    <div class="box has-background-light raises-on-hover address p-3"
+    <div class="box address p-3"
         @mouseover="controls = true"
         @mouseleave="controls = !confirmation ? false : controls">
         <div class="media">
@@ -7,17 +7,17 @@
                 <span class="icon is-pulled-right has-text-success"
                     v-tooltip="i18n('default')"
                     v-if="address.isDefault">
-                    <fa icon="anchor"/>
+                    <fa :icon="icons.anchor"/>
                 </span>
                 <span class="icon is-pulled-right has-text-success"
                     v-tooltip="i18n('default')"
                     v-if="address.isShipping">
-                    <fa icon="truck"/>
+                    <fa :icon="icons.truck"/>
                 </span>
                 <span class="icon is-pulled-right has-text-success"
                     v-tooltip="i18n('default')"
                     v-if="address.isBilling">
-                    <fa icon="money-bill-wave"/>
+                    <fa :icon="icons.billing"/>
                 </span>
                 <p>
                     {{ address.street }}
@@ -33,7 +33,7 @@
                 </p>
                 <p>
                     <span class="icon is-small">
-                        <fa icon="globe"
+                        <fa :icon="icons.globe"
                             size="xs"/>
                     </span>
                     <span>
@@ -44,25 +44,25 @@
                         <a class="button is-naked is-small"
                             @click="$emit('edit')">
                             <span class="icon">
-                                <fa icon="pencil-alt"/>
+                                <fa :icon="icons.edit"/>
                             </span>
                         </a>
                         <a class="button is-naked is-small"
                             @click="$emit('make-default')">
                             <span class="icon">
-                                <fa icon="anchor"/>
+                                <fa :icon="icons.anchor"/>
                             </span>
                         </a>
                         <a class="button is-naked is-small"
                             @click="$emit('make-shipping')">
                             <span class="icon">
-                                <fa icon="truck"/>
+                                <fa :icon="icons.truck"/>
                             </span>
                         </a>
                         <a class="button is-naked is-small"
                             @click="$emit('make-billing')">
                             <span class="icon">
-                                <fa icon="money-bill-wave"/>
+                                <fa :icon="icons.billing"/>
                             </span>
                         </a>
                         <confirmation placement="top"
@@ -71,7 +71,7 @@
                             @confirm="$emit('delete')">
                             <a class="button is-naked is-small">
                                 <span class="icon">
-                                    <fa icon="trash-alt"/>
+                                    <fa :icon="icons.delete"/>
                                 </span>
                             </a>
                         </confirmation>
@@ -79,7 +79,7 @@
                 </p>
                 <p v-if="address.notes">
                     <span class="icon is-small">
-                        <fa icon="sticky-note"
+                        <fa :icon="icons.notes"
                             size="xs"/>
                     </span>
                     {{ address.notes }}
@@ -93,17 +93,11 @@
 import 'v-tooltip/dist/v-tooltip.css';
 import { VTooltip } from 'v-tooltip';
 import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-    faPencilAlt, faAnchor, faGlobe, faStickyNote, faTrashAlt,
+    faPen, faAnchor, faGlobe, faNoteSticky, faTrashCan,
     faTruck, faMoneyBillWave,
 } from '@fortawesome/free-solid-svg-icons';
 import Confirmation from '@enso-ui/confirmation/bulma';
-
-library.add(
-    faPencilAlt, faAnchor, faGlobe, faStickyNote,
-    faTrashAlt, faTruck, faMoneyBillWave,
-);
 
 export default {
     name: 'AddressCard',
@@ -126,6 +120,15 @@ export default {
     data: () => ({
         controls: false,
         confirmation: false,
+        icons: {
+            anchor: faAnchor,
+            billing: faMoneyBillWave,
+            delete: faTrashCan,
+            edit: faPen,
+            globe: faGlobe,
+            notes: faNoteSticky,
+            truck: faTruck,
+        },
     }),
 
     computed: {

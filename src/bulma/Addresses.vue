@@ -6,13 +6,13 @@
                 :internal-query="internalQuery"
                 :fetch="fetch">
                 <p class="control">
-                    <a class="button is-small is-info is-rounded is-bold"
+                    <a class="button is-small is-rounded has-text-weight-bold"
                         @click="form = true">
                         <span>
                             {{ i18n('New Address') }}
                         </span>
                         <span class="icon">
-                            <fa icon="plus"/>
+                            <fa :icon="icons.plus"/>
                         </span>
                     </a>
                 </p>
@@ -21,7 +21,7 @@
                         v-model="internalQuery"
                         :placeholder="i18n('Filter')">
                     <span class="icon is-small is-left">
-                        <fa icon="search"/>
+                        <fa :icon="icons.search"/>
                     </span>
                     <span class="icon is-small is-right clear-button"
                         @click="internalQuery = ''"
@@ -30,13 +30,13 @@
                     </span>
                 </p>
                 <p class="control">
-                    <a class="button is-small is-rounded is-bold"
+                    <a class="button is-small is-rounded has-text-weight-bold"
                         @click="fetch()">
                         <span>
                             {{ i18n('Reload') }}
                         </span>
                         <span class="icon">
-                            <fa icon="sync"/>
+                            <fa :icon="icons.reload"/>
                         </span>
                     </a>
                 </p>
@@ -67,12 +67,9 @@
 <script>
 import { faPlus, faSync, faSearch } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
 import { Modal } from '@enso-ui/modal/bulma';
 import AddressCard from './AddressCard.vue';
 import AddressForm from './AddressForm.vue';
-
-library.add(faPlus, faSync, faSearch);
 
 export default {
     name: 'Addresses',
@@ -104,6 +101,11 @@ export default {
         loading: false,
         addresses: [],
         internalQuery: '',
+        icons: {
+            plus: faPlus,
+            reload: faSync,
+            search: faSearch,
+        },
     }),
 
     computed: {
