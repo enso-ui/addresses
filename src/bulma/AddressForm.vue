@@ -82,9 +82,7 @@
 </template>
 
 <script setup>
-import {
-    computed, defineEmits, defineOptions, defineProps, inject, nextTick, reactive, ref,
-} from 'vue';
+import { computed, inject, nextTick, reactive, ref } from 'vue';
 import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
 import { faMagnifyingGlassLocation, faMapPin } from '@fortawesome/free-solid-svg-icons';
 
