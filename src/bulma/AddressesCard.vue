@@ -30,7 +30,7 @@ import {
     Card, CardHeader, CardRefresh, CardCollapse, CardBadge, CardContent,
 } from '@enso-ui/card/bulma';
 import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
-import { useStore } from '../utils/pinia';
+import { layout as useLayout } from '@enso-ui/ui/src/pinia/layout';
 import Addresses from './Addresses.vue';
 
 export default {
@@ -79,7 +79,7 @@ export default {
 
     computed: {
         isMobile() {
-            return useStore('layout').isMobile;
+            return useLayout().isMobile;
         },
         displayTitle() {
             return !this.isMobile

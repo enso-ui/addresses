@@ -6,7 +6,7 @@
                 :internal-query="internalQuery"
                 :fetch="fetch">
                 <p class="control">
-                    <a class="button is-small is-rounded has-text-weight-bold"
+                    <a class="button is-small"
                         @click="form = true">
                         <span>
                             {{ i18n('New Address') }}
@@ -17,7 +17,7 @@
                     </a>
                 </p>
                 <p class="control has-icons-left has-icons-right is-expanded">
-                    <input class="input is-rounded is-small"
+                    <input class="input is-small"
                         v-model="internalQuery"
                         :placeholder="i18n('Filter')">
                     <span class="icon is-small is-left">
@@ -30,7 +30,7 @@
                     </span>
                 </p>
                 <p class="control">
-                    <a class="button is-small is-rounded has-text-weight-bold"
+                    <a class="button is-small"
                         @click="fetch()">
                         <span>
                             {{ i18n('Reload') }}

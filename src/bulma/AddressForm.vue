@@ -7,19 +7,16 @@
         v-bind="$attrs"
         disable-state
         ref="form">
-        <template #actions-left
-            v-if="canLocalize">
-            <a class="button is-warning"
+        <template #actions-left>
+            <action tag="a"
                 :class="{'loading': loading}"
-                @click="localize">
-                <span class="is-hidden-mobile">
-                    {{ i18n('Localize') }}
-                </span>
-                <span class="icon">
-                    <fa :icon="icons.localize"/>
-                </span>
-                <span class="is-hidden-mobile"/>
-            </a>
+                :button="{
+                    'class': 'is-dark',
+                    'icon': faMapPin,
+                    'label': 'Localize'
+                }"
+                @click="localize"
+                v-if="canLocalize"/>
         </template>
         <template #country_id="{ field: countryId }">
             <form-field :field="countryId"
@@ -30,7 +27,7 @@
                 <label class="label">
                     {{ i18n(postcodeField.label) }}
                 </label>
-                <div class="field has-addons">
+                <div class="field has-addons mb-0">
                     <div class="control is-expanded">
                         <input class="input"
                             :class="['input', { 'is-danger': errors.has(postcodeField.name) }]"
@@ -44,7 +41,7 @@
                         <a :class="['button', postcodeCss]"
                             @click="loadAddress">
                             <span class="icon">
-                                <fa :icon="icons.search"/>
+                                <fa :icon="faMagnifyingGlassLocation"/>
                             </span>
                         </a>
                     </div>
@@ -83,10 +80,9 @@
 
 <script setup>
 import { computed, inject, nextTick, reactive, ref } from 'vue';
-import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
 import { faMagnifyingGlassLocation, faMapPin } from '@fortawesome/free-solid-svg-icons';
 
-import { EnsoForm, FormField } from '@enso-ui/forms/bulma';
+import { EnsoForm, FormField, Action } from '@enso-ui/forms/bulma';
 
 defineOptions({ inheritAttrs: false });
 
@@ -121,10 +117,6 @@ const postcode = ref(null);
 const params = reactive({ countryId: null });
 const localityParams = reactive({ region_id: null });
 const sectorParams = reactive({ locality_id: null });
-const icons = {
-    localize: faMapPin,
-    search: faMagnifyingGlassLocation,
-};
 
 const canLocalize = computed(() => form.value && form.value.routeParam('address')
         && canAccess('core.addresses.localize'));
@@ -132,9 +124,10 @@ const canLocalize = computed(() => form.value && form.value.routeParam('address'
 const path = computed(() => (props.id
     ? route('core.addresses.edit', props.id)
     : route('core.addresses.create', params)));
+
 const postcodeCss = computed(() => {
     if (postcode.value === null) {
-        return 'is-info';
+        return 'is-dark';
     }
 
     return postcode.value
@@ -180,9 +173,9 @@ const loadAddress = () => {
     };
 
     http.get(route('core.addresses.postcode'), params)
-        .then(({ data: { postcode } }) => {
+        .then(({ data }) => {
             ['lat', 'long', 'city', 'region_id', 'locality_id', 'street']
-                .forEach(key => (form.value.field(key).value = postcode[key]
+                .forEach(key => (form.value.field(key).value = data.postcode[key]
                 || form.value.field(key).value));
             postcode.value = true;
         }).catch(error => {
