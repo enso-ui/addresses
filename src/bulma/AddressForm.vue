@@ -80,6 +80,7 @@
 
 <script setup>
 import { computed, inject, nextTick, reactive, ref } from 'vue';
+import { FontAwesomeIcon as Fa } from '@fortawesome/vue-fontawesome';
 import { faMagnifyingGlassLocation, faMapPin } from '@fortawesome/free-solid-svg-icons';
 
 import { EnsoForm, FormField, Action } from '@enso-ui/forms/bulma';
