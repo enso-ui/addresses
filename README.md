@@ -26,7 +26,7 @@ This package is also available through the full `enso-ui` workspace bundle.
 
 ## Features
 
-- ships `Addresses` and `AddressesCard` through the public Bulma entrypoint
+- exports `Addresses` and `AddressesCard` through the public Bulma entrypoint
 - loads address collections over the injected HTTP client and Enso route helper
 - supports filtering, creation, edit, default/shipping/billing toggles, and deletion
 - pairs the address list with the Enso modal and form workflow
@@ -79,6 +79,12 @@ Props:
 
 Events:
 - No direct emits; the wrapped `Addresses` component raises `update`.
+
+## Companion Backend Package
+
+- [`laravel-enso/addresses`](https://docs.laravel-enso.com/backend/addresses.html) [↗](https://github.com/laravel-enso/addresses)
+
+The frontend widgets expect the backend package to provide the address CRUD endpoints, modal form contracts, and typed address flags used by the card workflow.
 
 ## Depends On
 
